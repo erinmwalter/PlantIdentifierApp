@@ -10,54 +10,54 @@ function ImageUpload() {
     const [file, setFile] = useState(null);
     const [preview, setPreview] = useState(null);
 
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        try {
-        
-        // const response = await fetch("", {
-        //     method: "POST",
-        //     headers: {
-        //         "Content-Type": "application/json",
-        //     },
-        //     body: JSON.stringify(file),
-        // });
-
-        // const data = await response.json();
-        // console.log("Success:", data);
-        // alert("Data submitted successfully!");
-        
-        // if (response.ok) {
-        //     alert("Post created successfully!");
-        //     setFile("");
-        // } else {
-        //     alert(data.message || "Something went wrong!");
-        // } 
-        } catch(error) {
-            // console.error("Error:", error);
-            // alert("Error sending data!");
-        }
-    };
-    
-    const handleUpload = (event) => {
-        const image = event.target.files[0];
-
-        if(image) {
-            setFile(image);
-            const previewUrl = URL.createObjectURL(image);
-            setPreview(previewUrl);
-            console.log('File Name:', image.name);
-        }
-    }
-
-    const openFile = () => {
-        document.getElementById("plant-upload").click();
-    }
-
+    // CLEARING UPLOAD
     const clearUpload = () => {
         setFile(null);
         setPreview(null);
         document.getElementById('plant-upload').value = "";
+    };
+
+    // OPENING UPLOAD
+    const openFile = () => {
+        document.getElementById('plant-upload').click();
     }
+
+    // HANDLES SETTING IMAGE AND PREVIEW
+    const handleUpload = (event) => {
+        const image = event.target.files[0];
+
+        if (image) {
+            setFile(image);
+            const previewURL = URL.createObjectURL(image);
+            setPreview(previewURL);
+            console.log('File Name: ', image.name);
+        }
+    }
+
+    // HANDLES SUBMIT AND SENDS TO BACKEND
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        try {
+            const formData = new FormData();
+            formData.append('image', file);
+            const response = await fetch(``, {      // TODO: ENTER BACKEND API
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!response.ok) {
+                throw new Error("failed to upload image");
+            }
+
+            if (file) {
+
+            }
+        } catch (error) {
+            console.error("Error upload image: ", error);
+        }
+    }
+
+
 
     return(
         <div className="ImageUpload">
@@ -75,7 +75,7 @@ function ImageUpload() {
                     onChange={handleUpload}>
                 </input>
                 <div className="buttonlayout">
-                    <button onClick={openFile} className="UploadButton">
+                    <button type='button' onClick={openFile} className="UploadButton">
                         UPLOAD
                     </button>
                     <button type="submit" className="SubmitButton">
