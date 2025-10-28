@@ -4,7 +4,7 @@ import os
 import numpy as np
 import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
-
+from tensorflow.keras.layers import Dense
 import time
 
 VGG_MEAN = [103.939, 116.779, 123.68]
@@ -68,34 +68,36 @@ class Vgg16:
         self.conv5_3 = self.conv_layer(self.conv5_2, "conv5_3")
         self.pool5 = self.max_pool(self.conv5_3, 'pool5')
         #change below here
-        #self.fc6 = self.fc_layer(self.pool5, "fc6")
-        #assert self.fc6.get_shape().as_list()[1:] == [4096]
-        #self.relu6 = tf.nn.relu(self.fc6)
+        self.fc6 = self.fc_layer(self.pool5, "fc6")
+        assert self.fc6.get_shape().as_list()[1:] == [4096]
+        self.relu6 = tf.nn.relu(self.fc6)
 
-        #self.fc7 = self.fc_layer(self.relu6, "fc7")
-        #self.relu7 = tf.nn.relu(self.fc7)
+        self.fc7 = self.fc_layer(self.relu6, "fc7")
+        self.relu7 = tf.nn.relu(self.fc7)
 
-        #self.fc8 = self.fc_layer(self.relu7, "fc8")
+        self.fc8 = self.fc_layer(self.relu7, "fc8")
 
-        #self.prob = tf.nn.softmax(self.fc8, name="prob")
+        self.prob = tf.nn.softmax(self.fc8, name="prob")
         #what do I change? It is leaves with spots right 
-        #self.data_dict = None
-        #print(("build model finished: %ds" % (time.time() - start_time)))
+        self.data_dict = None
+        print(("build model finished: %ds" % (time.time() - start_time)))
 
 
         # Global Average Pooling instead of fc6
-        self.gap = tf.reduce_mean(self.pool5, axis=[1, 2], name='global_avg_pool')
+        #self.gap = tf.reduce_mean(self.pool5, axis=[1, 2], name='global_avg_pool')
     
         # Optional: smaller FC layer for dimensionality reduction
-        self.fc7 = self.fc_layer(self.gap, name='fc7')
-        self.dropout = tf.nn.dropout(self.fc7, rate=0.5)
+        #self.fc7 = self.fc_layer(self.gap, name='fc7')
+        #adapter = Dense(4096, activation='relu')(self.fc7)
+        #self.fc7_output = fc7_layer(adapter)
+        #self.dropout = tf.nn.dropout(self.fc7_output, rate=0.5)
     
         # Final classification layer
-        self.fc_disease = self.fc_layer(self.dropout, 71, name='fc_disease')
-        self.prob = tf.nn.softmax(self.fc_disease, name="prob")
+        #self.fc_disease = self.fc_layer(self.dropout, 71, name='fc_disease')
+        #self.prob = tf.nn.softmax(self.fc_disease, name="prob")
 
-        self.data_dict = None
-        print(("build model finished: %ds" % (time.time() - start_time)))
+        #self.data_dict = None
+        #print(("build model finished: %ds" % (time.time() - start_time)))
 
 
     #def avg_pool(self, bottom, name):
