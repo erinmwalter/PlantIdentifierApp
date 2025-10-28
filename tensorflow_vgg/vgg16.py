@@ -67,23 +67,39 @@ class Vgg16:
         self.conv5_2 = self.conv_layer(self.conv5_1, "conv5_2")
         self.conv5_3 = self.conv_layer(self.conv5_2, "conv5_3")
         self.pool5 = self.max_pool(self.conv5_3, 'pool5')
+        #change below here
+        #self.fc6 = self.fc_layer(self.pool5, "fc6")
+        #assert self.fc6.get_shape().as_list()[1:] == [4096]
+        #self.relu6 = tf.nn.relu(self.fc6)
 
-        self.fc6 = self.fc_layer(self.pool5, "fc6")
-        assert self.fc6.get_shape().as_list()[1:] == [4096]
-        self.relu6 = tf.nn.relu(self.fc6)
+        #self.fc7 = self.fc_layer(self.relu6, "fc7")
+        #self.relu7 = tf.nn.relu(self.fc7)
 
-        self.fc7 = self.fc_layer(self.relu6, "fc7")
-        self.relu7 = tf.nn.relu(self.fc7)
+        #self.fc8 = self.fc_layer(self.relu7, "fc8")
 
-        self.fc8 = self.fc_layer(self.relu7, "fc8")
+        #self.prob = tf.nn.softmax(self.fc8, name="prob")
+        #what do I change? It is leaves with spots right 
+        #self.data_dict = None
+        #print(("build model finished: %ds" % (time.time() - start_time)))
 
-        self.prob = tf.nn.softmax(self.fc8, name="prob")
+
+        # Global Average Pooling instead of fc6
+        self.gap = tf.reduce_mean(self.pool5, axis=[1, 2], name='global_avg_pool')
+    
+        # Optional: smaller FC layer for dimensionality reduction
+        self.fc7 = self.fc_layer(self.gap, name='fc7')
+        self.dropout = tf.nn.dropout(self.fc7, rate=0.5)
+    
+        # Final classification layer
+        self.fc_disease = self.fc_layer(self.dropout, 71, name='fc_disease')
+        self.prob = tf.nn.softmax(self.fc_disease, name="prob")
 
         self.data_dict = None
         print(("build model finished: %ds" % (time.time() - start_time)))
 
-    def avg_pool(self, bottom, name):
-        return tf.nn.avg_pool(bottom, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME', name=name)
+
+    #def avg_pool(self, bottom, name):
+    #    return tf.nn.avg_pool(bottom, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME', name=name)
 
     def max_pool(self, bottom, name):
         return tf.nn.max_pool(bottom, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME', name=name)

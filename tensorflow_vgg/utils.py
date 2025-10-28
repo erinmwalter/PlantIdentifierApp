@@ -12,7 +12,7 @@ import os
 # [height, width, depth]
 def load_image(path):
     # load image
-    img = skimage.io.imread(r'.\tensorflow-vgg\test_data\tiger.jpeg')
+    img = skimage.io.imread(r'.\tensorflow_vgg\test_data\tiger.jpeg')
     img = img / 255.0
     assert (0 <= img).all() and (img <= 1.0).all()
     # print "Original Image Shape: ", img.shape
@@ -32,7 +32,7 @@ def print_prob(prob, file_path):
     #script_dir = os.path.dirname(os.path.abspath(__file__))
     #full_path = os.path.join(script_dir, file_path)
 
-    synset = [l.strip() for l in open(r'.\tensorflow-vgg\synset.txt').readlines()]
+    synset = [l.strip() for l in open(r'.\tensorflow_vgg\synset.txt').readlines()]
 
     # print prob
     pred = np.argsort(prob)[::-1]
