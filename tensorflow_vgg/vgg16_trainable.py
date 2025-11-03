@@ -1,176 +1,159 @@
 import tensorflow as tf
-
 import numpy as np
 from functools import reduce
 
 VGG_MEAN = [103.939, 116.779, 123.68]
 
 
-class Vgg16:
+class Vgg16(tf.keras.Model):
     """
-    A trainable version VGG16.
+    A trainable version of VGG16, compatible with TensorFlow 2.x
     """
 
-    def __init__(self, vgg16_npy_path=None, trainable=True, dropout=0.5):
-        if vgg16_npy_path is not None:
-            self.data_dict = np.load(vgg16_npy_path, encoding='latin1').item()
+    def __init__(self, vgg16_npy_path=None, num_classes=71, dropout=0.5):
+        super(Vgg16, self).__init__()
+        self.dropout_rate = dropout
+        self.num_classes = num_classes
+        
+        #Load pre-trained weights if provided
+        #if vgg16_npy_path is not None:
+            #self.data_dict = np.load(vgg16_npy_path, allow_pickle=True, encoding='latin1').item()
+        #else:
+            #self.data_dict = None
+
+        # --- Convolutional layers ---
+        self.conv1_1 = tf.keras.layers.Conv2D(64, 3, padding='same', activation='relu', name='conv1_1')
+        self.conv1_2 = tf.keras.layers.Conv2D(64, 3, padding='same', activation='relu', name='conv1_2')
+        self.pool1 = tf.keras.layers.MaxPool2D(2, 2, padding='same', name='pool1')
+
+        self.conv2_1 = tf.keras.layers.Conv2D(128, 3, padding='same', activation='relu', name='conv2_1')
+        self.conv2_2 = tf.keras.layers.Conv2D(128, 3, padding='same', activation='relu', name='conv2_2')
+        self.pool2 = tf.keras.layers.MaxPool2D(2, 2, padding='same', name='pool2')
+
+        self.conv3_1 = tf.keras.layers.Conv2D(256, 3, padding='same', activation='relu', name='conv3_1')
+        self.conv3_2 = tf.keras.layers.Conv2D(256, 3, padding='same', activation='relu', name='conv3_2')
+        self.conv3_3 = tf.keras.layers.Conv2D(256, 3, padding='same', activation='relu', name='conv3_3')
+        self.pool3 = tf.keras.layers.MaxPool2D(2, 2, padding='same', name='pool3')
+
+        self.conv4_1 = tf.keras.layers.Conv2D(512, 3, padding='same', activation='relu', name='conv4_1')
+        self.conv4_2 = tf.keras.layers.Conv2D(512, 3, padding='same', activation='relu', name='conv4_2')
+        self.conv4_3 = tf.keras.layers.Conv2D(512, 3, padding='same', activation='relu', name='conv4_3')
+        self.pool4 = tf.keras.layers.MaxPool2D(2, 2, padding='same', name='pool4')
+
+        self.conv5_1 = tf.keras.layers.Conv2D(512, 3, padding='same', activation='relu', name='conv5_1')
+        self.conv5_2 = tf.keras.layers.Conv2D(512, 3, padding='same', activation='relu', name='conv5_2')
+        self.conv5_3 = tf.keras.layers.Conv2D(512, 3, padding='same', activation='relu', name='conv5_3')
+        self.pool5 = tf.keras.layers.MaxPool2D(2, 2, padding='same', name='pool5')
+
+        # --- Custom classifier ---
+        self.global_avg_pool = tf.keras.layers.GlobalAveragePooling2D(name='global_avg_pool')
+        self.fc6 = tf.keras.layers.Dense(512, activation='relu', name='fc6')
+        self.dropout = tf.keras.layers.Dropout(dropout)
+        self.fc7 = tf.keras.layers.Dense(num_classes, activation='softmax', name='fc7')
+
+        # Initialize weights if data_dict exists
+        #if self.data_dict is not None:
+            #self._load_weights_from_npy()
+
+    def call(self, inputs, training=False):
+        # Scale and BGR conversion
+        x = inputs * 255.0
+        red, green, blue = tf.split(x, num_or_size_splits=3, axis=-1)
+        x = tf.concat([blue - VGG_MEAN[0],
+                       green - VGG_MEAN[1],
+                       red - VGG_MEAN[2]], axis=-1)
+
+        # --- Forward pass ---
+        x = self.conv1_1(x)
+        x = self.conv1_2(x)
+        x = self.pool1(x)
+
+        x = self.conv2_1(x)
+        x = self.conv2_2(x)
+        x = self.pool2(x)
+
+        x = self.conv3_1(x)
+        x = self.conv3_2(x)
+        x = self.conv3_3(x)
+        x = self.pool3(x)
+
+        x = self.conv4_1(x)
+        x = self.conv4_2(x)
+        x = self.conv4_3(x)
+        x = self.pool4(x)
+
+        x = self.conv5_1(x)
+        x = self.conv5_2(x)
+        x = self.conv5_3(x)
+        x = self.pool5(x)
+
+        x = self.global_avg_pool(x)
+        x = self.fc6(x)
+        x = self.dropout(x, training=training)
+        x = self.fc7(x)
+
+        return x
+
+    def train_step(self, data):
+        tf.print("Data passed to train_step:", data)
+        print("DEBUG data type:", type(data))
+        if isinstance(data, (list, tuple)):
+             print("DEBUG data length:", len(data))
+             for i, d in enumerate(data):
+                   print(f"DEBUG element {i}:", type(d), getattr(d, 'shape', None))
         else:
-            self.data_dict = None
+             print("DEBUG data:", data)
 
-        self.var_dict = {}
-        self.trainable = trainable
-        self.dropout = dropout
+        x, y = data
+        ...
 
-    def build(self, rgb, train_mode=None):
-        """
-        load variable from npy to build the VGG
+    def load_weights_from_npy(self, npy_path):
+        """Load pre-trained weights from .npy file AFTER model is built"""
+        if npy_path is None:
+            print("No weights file provided")
+            return
+        
+        self.data_dict = np.load(npy_path, encoding='latin1', allow_pickle=True).item()
+        print(f"Loading weights from {npy_path}...")
+        
+        # Map of layer names in the .npy file
+        layer_map = {
+            'conv1_1': self.conv1_1,
+            'conv1_2': self.conv1_2,
+            'conv2_1': self.conv2_1,
+            'conv2_2': self.conv2_2,
+            'conv3_1': self.conv3_1,
+            'conv3_2': self.conv3_2,
+            'conv3_3': self.conv3_3,
+            'conv4_1': self.conv4_1,
+            'conv4_2': self.conv4_2,
+            'conv4_3': self.conv4_3,
+            'conv5_1': self.conv5_1,
+            'conv5_2': self.conv5_2,
+            'conv5_3': self.conv5_3,
+        }
+        
+        loaded_count = 0
+        for name, layer in layer_map.items():
+            if name in self.data_dict:
+                try:
+                    weights = self.data_dict[name]
+                    # VGG16 .npy format: weights[0] = kernel, weights[1] = bias
+                    kernel = weights[0]
+                    bias = weights[1]
+                    layer.set_weights([kernel, bias])
+                    loaded_count += 1
+                    print(f"   Loaded {name}: kernel shape {kernel.shape}, bias shape {bias.shape}")
+                    print(len(weights))
+                    for i, w in enumerate(weights):
+                        print(i, type(w), getattr(w, 'shape', None))
 
-        :param rgb: rgb image [batch, height, width, 3] values scaled [0, 1]
-        :param train_mode: a bool tensor, usually a placeholder: if True, dropout will be turned on
-        """
+                except Exception as e:
+                    print(f"   Failed to load {name}: {e}")
+        
+        print(f"\n Successfully loaded {loaded_count}/13 convolutional layers")
+        print("Note: FC layers (fc6, fc7) will be trained from scratch\n")
 
-        rgb_scaled = rgb * 255.0
-
-        # Convert RGB to BGR
-        red, green, blue = tf.split(axis=3, num_or_size_splits=3, value=rgb_scaled)
-        assert red.get_shape().as_list()[1:] == [224, 224, 1]
-        assert green.get_shape().as_list()[1:] == [224, 224, 1]
-        assert blue.get_shape().as_list()[1:] == [224, 224, 1]
-        bgr = tf.concat(axis=3, values=[
-            blue - VGG_MEAN[0],
-            green - VGG_MEAN[1],
-            red - VGG_MEAN[2],
-        ])
-        assert bgr.get_shape().as_list()[1:] == [224, 224, 3]
-
-        self.conv1_1 = self.conv_layer(bgr, 3, 64, "conv1_1")
-        self.conv1_2 = self.conv_layer(self.conv1_1, 64, 64, "conv1_2")
-        self.pool1 = self.max_pool(self.conv1_2, 'pool1')
-
-        self.conv2_1 = self.conv_layer(self.pool1, 64, 128, "conv2_1")
-        self.conv2_2 = self.conv_layer(self.conv2_1, 128, 128, "conv2_2")
-        self.pool2 = self.max_pool(self.conv2_2, 'pool2')
-
-        self.conv3_1 = self.conv_layer(self.pool2, 128, 256, "conv3_1")
-        self.conv3_2 = self.conv_layer(self.conv3_1, 256, 256, "conv3_2")
-        self.conv3_3 = self.conv_layer(self.conv3_2, 256, 256, "conv3_3")
-        self.pool3 = self.max_pool(self.conv3_3, 'pool3')
-
-        self.conv4_1 = self.conv_layer(self.pool3, 256, 512, "conv4_1")
-        self.conv4_2 = self.conv_layer(self.conv4_1, 512, 512, "conv4_2")
-        self.conv4_3 = self.conv_layer(self.conv4_2, 512, 512, "conv4_3")
-        self.pool4 = self.max_pool(self.conv4_4, 'pool4')
-
-        self.conv5_1 = self.conv_layer(self.pool4, 512, 512, "conv5_1")
-        self.conv5_2 = self.conv_layer(self.conv5_1, 512, 512, "conv5_2")
-        self.conv5_3 = self.conv_layer(self.conv5_2, 512, 512, "conv5_3")
-        self.pool5 = self.max_pool(self.conv5_4, 'pool5')
-       
-        # Add new custom classifier:
-    
-        # Global Average Pooling instead of fc6
-        self.gap = tf.reduce_mean(self.pool5, axis=[1, 2], name='global_avg_pool')
-    
-        # Optional: smaller FC layer for dimensionality reduction
-        #self.fc_new = tf.layers.dense(self.gap, 512, activation=tf.nn.relu, name='fc_custom')
-        self.fc6 = self.fc_layer(self.gap,25088, 4096, "fc6")
-        self.relu6 = tf.nn.relu(self.fc6)
-        assert self.fc6.get_shape().as_list()[1:] == [4096]
-        #self.dropout = tf.nn.dropout(self.fc_new, rate=dropout_rate)
-        if train_mode is not None:
-            self.relu6 = tf.cond(train_mode, lambda: tf.nn.dropout(self.relu6, self.dropout), lambda: self.relu6)
-        elif self.trainable:
-            self.relu6 = tf.nn.dropout(self.relu6, self.dropout)
-
-        # Final classification layer
-        #self.fc_disease = tf.layers.dense(self.relu6, num_disease_classes, name='fc_disease')
-        self.fc7 = self.fc_layer(self.relu6,  4096, 71,"fc7")
-        self.prob = tf.nn.softmax(self.fc7, name="prob")
-        #--------------------------------------------------------------------
-   
-        self.data_dict = None
-        print(("build model finished: %ds" % (time.time() - start_time)))
-
-
-    def avg_pool(self, bottom, name):
-        return tf.nn.avg_pool(bottom, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME', name=name)
-
-    def max_pool(self, bottom, name):
-        return tf.nn.max_pool(bottom, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME', name=name)
-
-    def conv_layer(self, bottom, in_channels, out_channels, name):
-        with tf.variable_scope(name):
-            filt, conv_biases = self.get_conv_var(3, in_channels, out_channels, name)
-
-            conv = tf.nn.conv2d(bottom, filt, [1, 1, 1, 1], padding='SAME')
-            bias = tf.nn.bias_add(conv, conv_biases)
-            relu = tf.nn.relu(bias)
-
-            return relu
-
-
-    def fc_layer(self, bottom, in_size, out_size, name):
-        with tf.variable_scope(name):
-            weights, biases = self.get_fc_var(in_size, out_size, name)
-
-            x = tf.reshape(bottom, [-1, in_size])
-            fc = tf.nn.bias_add(tf.matmul(x, weights), biases)
-
-            return fc
-
-    def get_conv_var(self, filter_size, in_channels, out_channels, name):
-        initial_value = tf.truncated_normal([filter_size, filter_size, in_channels, out_channels], 0.0, 0.001)
-        filters = self.get_var(initial_value, name, 0, name + "_filters")
-
-        initial_value = tf.truncated_normal([out_channels], .0, .001)
-        biases = self.get_var(initial_value, name, 1, name + "_biases")
-
-        return filters, biases
-
-    def get_fc_var(self, in_size, out_size, name):
-        initial_value = tf.truncated_normal([in_size, out_size], 0.0, 0.001)
-        weights = self.get_var(initial_value, name, 0, name + "_weights")
-
-        initial_value = tf.truncated_normal([out_size], .0, .001)
-        biases = self.get_var(initial_value, name, 1, name + "_biases")
-
-        return weights, biases
-
-    def get_var(self, initial_value, name, idx, var_name):
-        if self.data_dict is not None and name in self.data_dict:
-            value = self.data_dict[name][idx]
-        else:
-            value = initial_value
-
-        if self.trainable:
-            var = tf.Variable(value, name=var_name)
-        else:
-            var = tf.constant(value, dtype=tf.float32, name=var_name)
-
-        self.var_dict[(name, idx)] = var
-
-        # print var_name, var.get_shape().as_list()
-        assert var.get_shape() == initial_value.get_shape()
-
-        return var
-
-    def save_npy(self, sess, npy_path="./vgg16-save.npy"):
-        assert isinstance(sess, tf.Session)
-
-        data_dict = {}
-
-        for (name, idx), var in list(self.var_dict.items()):
-            var_out = sess.run(var)
-            if name not in data_dict:
-                data_dict[name] = {}
-            data_dict[name][idx] = var_out
-
-        np.save(npy_path, data_dict)
-        print(("file saved", npy_path))
-        return npy_path
 
     def get_var_count(self):
-        count = 0
-        for v in list(self.var_dict.values()):
-            count += reduce(lambda x, y: x * y, v.get_shape().as_list())
-        return count
+        return np.sum([np.prod(v.shape) for v in self.trainable_variables])

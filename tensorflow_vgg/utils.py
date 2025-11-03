@@ -3,6 +3,9 @@ import skimage.io
 import skimage.transform
 import numpy as np
 import os
+os.environ['TF_USE_LEGACY_KERAS'] = '1'
+
+import tensorflow as tf
 
 
 # synset = [l.strip() for l in open('synset.txt').readlines()]
