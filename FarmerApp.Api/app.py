@@ -1,9 +1,14 @@
 from flask import Flask, send_from_directory, jsonify
 from flask_cors import CORS
 import os
+from routes.prediction_routes import prediction_bp
 
+# Initialize Flask app
 app = Flask(__name__, static_folder='./clientapp/build')
 CORS(app)
+
+# Register the prediction blueprint
+app.register_blueprint(prediction_bp)
 
 @app.route('/api/hello', methods=['GET'])
 def hello():
