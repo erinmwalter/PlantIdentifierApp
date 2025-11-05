@@ -2,18 +2,40 @@ import Header from './components/Header';
 import ImageUpload from './components/ImageUpload';
 import PlantInfo from './components/PlantInfo';
 import './App.css';
+import { useState } from 'react';
+
 
 function App() {
+  const [predictionData, setPredictionData] = useState(null);
+  const [showSupportedPlants, setShowSupportedPlants] = useState(false);
+
+  const handlePredictionResult = (data) => {
+    setPredictionData(data);
+  }
+
+  const handleShowSupportedPlants = () => {
+    setShowSupportedPlants(true);
+  }
+
+  const handleCloseSupportedPlants = () => {
+    setShowSupportedPlants(false);
+  }
+
   return (
     <div className='App'>
-      <Header></Header>
+      <Header onShowSupportedPlants={handleShowSupportedPlants}></Header>
 
-      <div className='mainlayout'>
+      <main className='mainlayout'>
         <div className='sublayout'>
-          <ImageUpload></ImageUpload>
-          <PlantInfo></PlantInfo>
+          <ImageUpload onPredictionResult={handlePredictionResult}></ImageUpload>
+          <PlantInfo predictionData={predictionData}></PlantInfo>
         </div>
-      </div>
+      </main>
+
+      <SupportedPlants
+        isOpen={showSupportedPlants}
+        onClose={handleCloseSupportedPlants}>
+      </SupportedPlants>
     </div>
   );
 }
