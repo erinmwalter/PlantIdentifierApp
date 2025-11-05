@@ -6,52 +6,44 @@
 import { useState, useEffect } from "react";
 import './PlantInfo.css'
 
-function PlantInfo({ plantId }) {
-    const [plant, setPlant] = useState({
-        'name': "",
-        'description': "",
-        'confidence': null,
-    })
-
-    useEffect(() => {
-        if (!plantId) return;
-        const getPlantInfo = async () => {
-            try {
-                const response = await fetch(``);
-                if(!response.ok) {throw new Error("Failed to fetch plant data");
-                }
-                
-                const data = await response.json();
-
-                setPlant({
-                    'name': data.name,
-                    'description': data.description,
-                    'confident': data.confidence,
-                });
-
-            } catch (err) {
-                console.error("Error fetching plant data: ", err);
-            }
-        }
-        getPlantInfo();
-    }, [plantId]);
+function PlantInfo({ predictionData }) {
+    if (!predictionData) {
+        return (
+            <div className="PlantInfo">
+                <p>Upload an image to see plant identification results</p>
+            </div>
+        )
+    }
 
     return(
         <div className="PlantInfo">
             <div className="confident-match">
-                <label className="subtitle">Confident Level</label>
-                <span style={{marginBottom: '0.5rem'}}>{plant.condident}</span>
+                <label className="subtitle">Confidence Level</label>
+                <span style={{ marginBottom: '0.5rem' }}>
+                    {(predictionData.confidence * 100).toFixed(2)}%
+                </span>
            </div>
 
             <div className="item">
-                <label className="subtitle">Name of Plant</label>
-                <span>{plant.name}</span>
+                <label className="subtitle">Predicted Crop</label>
+                <span>{predictionData.predicted_crop}</span>
             </div>
 
-            <div className="item">
-                <label className="subtitle">Description of Plant</label>
-                <span>{plant.name}</span>
-            </div>
+            {predictionData.top_predictions && (
+                <div className="item">
+                    <label className="subtitle">Top Predictions</label>
+                    <div className="top-predictions">
+                        {predictionData.top_predictions.map((pred, index) => (
+                            <div key={index} className="prediction-item">
+                                <span className="crop-name">{pred.crop}</span>
+                                <span className="crop-confidence">
+                                    {(pred.confidence * 100).toFixed(2)}%
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
         </div>
     );

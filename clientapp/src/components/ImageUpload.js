@@ -2,18 +2,23 @@
     
     component for uploading images to the website
 */
-
 import { useState } from "react";
 import './ImageUpload.css'
 
-function ImageUpload() {
+function ImageUpload({ onPredictionResult }) {
     const [file, setFile] = useState(null);
     const [preview, setPreview] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     // CLEARING UPLOAD
     const clearUpload = () => {
         setFile(null);
         setPreview(null);
+        setError(null);
+        if (onPredictionResult) {
+            onPredictionResult(null);
+        }
         document.getElementById('plant-upload').value = "";
     };
 
@@ -30,6 +35,7 @@ function ImageUpload() {
             setFile(image);
             const previewURL = URL.createObjectURL(image);
             setPreview(previewURL);
+            setError(null);
             console.log('File Name: ', image.name);
         }
     }
@@ -37,23 +43,35 @@ function ImageUpload() {
     // HANDLES SUBMIT AND SENDS TO BACKEND
     const handleSubmit = async (event) => {
         event.preventDefault();
+        if (!file) {
+            setError("Please select an image first");
+            return;
+        }
+        setLoading(true);
+        setError(null);
+
         try {
             const formData = new FormData();
             formData.append('image', file);
-            const response = await fetch(``, {      // TODO: ENTER BACKEND API
+            const response = await fetch(`/api/predict`, {      // TODO: ENTER BACKEND API
                 method: 'POST',
                 body: formData,
             });
+
+            const result = await response.json();
 
             if (!response.ok) {
                 throw new Error("failed to upload image");
             }
 
-            if (file) {
-
+            if (result.success && onPredictionResult) {
+                onPredictionResult(result.data);
             }
         } catch (error) {
             console.error("Error upload image: ", error);
+            setError(error.message || "Failed to get prediction");
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -66,6 +84,7 @@ function ImageUpload() {
             <img src={preview} alt="preview" width="200" height="200">
             </img>
             }
+            {error && <div className="error-message">{error}</div>}
             <form onSubmit={handleSubmit}>
                 <input 
                     style={{display: 'none'}} 
@@ -78,8 +97,8 @@ function ImageUpload() {
                     <button type='button' onClick={openFile} className="UploadButton">
                         UPLOAD
                     </button>
-                    <button type="submit" className="SubmitButton">
-                        SUBMIT
+                    <button type="submit" className="SubmitButton" disabled={!file || loading}>
+                        {loading ? 'PROCESSING...' : 'SUBMIT'}
                     </button>
                 </div>
             </form>
