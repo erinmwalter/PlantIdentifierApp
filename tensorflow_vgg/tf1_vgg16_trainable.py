@@ -2,8 +2,8 @@
 import os
 os.environ['TF_USE_LEGACY_KERAS'] = '1'
 
-import tensorflow as tf
-
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 import numpy as np
 from functools import reduce
 
@@ -163,16 +163,23 @@ class Vgg16:
 
         return var
 
-    def save_npy(self, sess, npy_path="./vgg16-save.npy"):
+    def save_npy(self, sess, npy_path):
         assert isinstance(sess, tf.Session)
 
         data_dict = {}
+        number =0
 
         for (name, idx), var in list(self.var_dict.items()):
             var_out = sess.run(var)
             if name not in data_dict:
                 data_dict[name] = {}
             data_dict[name][idx] = var_out
+            number += 1
+
+        # FIX: make sure the directory exists
+        #os.makedirs(os.path.dirname(npy_path), exist_ok=True)
+        print(number)
+        print("Saving layers:", list(self.var_dict.keys()))
 
         np.save(npy_path, data_dict)
         print(("file saved", npy_path))

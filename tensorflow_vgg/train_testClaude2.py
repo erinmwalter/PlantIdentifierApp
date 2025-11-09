@@ -3,22 +3,22 @@ os.environ['TF_USE_LEGACY_KERAS'] = '1'
 
 import numpy as np
 import tensorflow.compat.v1 as tf
-tf.disable_v2_behavior()
-import vgg16_trainable
+tf.compat.v1.disable_v2_behavior()
+import tf1_vgg16_trainable
 import utils
 
 # ==========================================
 # CONFIGURATION
 # ==========================================
-DATA_DIR = r"C:\Users\abiga\Cro Disease ID\archive\data"
-BATCH_SIZE = 32
+DATA_DIR = r"C:\Users\abiga\Cro Disease ID\archive\fifty_of_each"
+BATCH_SIZE = 16
 IMG_SIZE = 224
-EPOCHS = 10
-LEARNING_RATE = 1e-4
-MODEL_SAVE_PATH = r"C:\Users\abiga\Cro Disease ID\PlantIdentiferApp\tensorflow_vgg\vgg16_plant_classifier.npy"
+EPOCHS = 5
+LEARNING_RATE = 0.002
+MODEL_SAVE_PATH = r"C:\Users\abiga\Cro Disease ID\PlantIdentifierApp\tensorflow_vgg\vgg16_plant_classifier.npy"
 
 # Limit images per class to avoid memory issues (remove this line to use all images)
-MAX_IMAGES_PER_CLASS = 500  # Adjust based on your RAM
+MAX_IMAGES_PER_CLASS = 20  # Adjust based on your RAM
 
 # ==========================================
 # DATA GENERATOR - LOADS BATCHES ON THE FLY
@@ -74,16 +74,16 @@ def load_batch(file_paths, label_list, indices, num_classes):
     
     batch_x = np.array(batch_x, dtype=np.float32)
     # Convert batch_y to numpy array first, then use for one-hot encoding
-    #batch_y_indices = np.array(batch_y, dtype=np.int32)
-    #batch_y = np.eye(num_classes, dtype=np.float32)[batch_y_indices]
+    batch_y_indices = np.array(batch_y, dtype=np.int32)
+    batch_y = np.eye(num_classes, dtype=np.float32)[batch_y_indices]
 
     # Manually create one-hot encoding to avoid any tensor issues
-    batch_y_onehot = np.zeros((len(batch_y), num_classes), dtype=np.float32)
-    for i, label_idx in enumerate(batch_y):
-        batch_y_onehot[i, label_idx] = 1.0
+    #batch_y_onehot = np.zeros((len(batch_y), num_classes), dtype=np.float32)
+    #for i, label_idx in enumerate(batch_y):
+    #    batch_y_onehot[i, label_idx] = 1.0
     
     
-    return batch_x, batch_y_onehot
+    return batch_x, batch_y
 
 
 # ==========================================
@@ -105,6 +105,7 @@ def main():
         raise ValueError("Too few images found! Check your DATA_DIR path.")
     
     # Step 3: Split train/val
+    np.random.seed(42)
     indices = np.arange(len(file_paths))
     np.random.shuffle(indices)
     
@@ -118,17 +119,17 @@ def main():
     # Step 4: Build TensorFlow graph
     print("\nBuilding model...")
     images = tf.placeholder(tf.float32, [None, IMG_SIZE, IMG_SIZE, 3])
-    labels = tf.placeholder(tf.float32, [None, num_classes])
+    labels_ph = tf.placeholder(tf.float32, [None, num_classes]) #quick fix: 32 was None
     train_mode = tf.placeholder(tf.bool)
     
-    vgg = vgg16_trainable.Vgg16()
+    vgg = tf1_vgg16_trainable.Vgg16(vgg16_npy_path=None)
     vgg.build(images, train_mode)
     
     loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(
-        logits=vgg.prob, labels=labels))
-    train_op = tf.train.AdamOptimizer(LEARNING_RATE).minimize(loss)
+        logits=vgg.fc7, labels=labels_ph))
+    train_op = tf.compat.v1.train.AdamOptimizer(LEARNING_RATE).minimize(loss)
     
-    correct = tf.equal(tf.argmax(vgg.prob, 1), tf.argmax(labels, 1))
+    correct = tf.equal(tf.argmax(vgg.prob, 1), tf.argmax(labels_ph, 1))
     acc = tf.reduce_mean(tf.cast(correct, tf.float32))
     
     # Step 5: Training loop
@@ -158,7 +159,7 @@ def main():
             
             _, batch_loss = sess.run([train_op, loss], 
                                     feed_dict={images: batch_x, 
-                                             labels: batch_y, 
+                                             labels_ph: batch_y, 
                                              train_mode: True})
             epoch_loss += batch_loss
             num_batches += 1
@@ -183,7 +184,7 @@ def main():
             
             v_acc, v_loss = sess.run([acc, loss],
                                     feed_dict={images: batch_x, 
-                                             labels: batch_y, 
+                                             labels_ph: batch_y, 
                                              train_mode: False})
             val_acc_total += v_acc
             val_loss_total += v_loss

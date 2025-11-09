@@ -4,6 +4,7 @@ import skimage.transform
 import numpy as np
 import os
 os.environ['TF_USE_LEGACY_KERAS'] = '1'
+from PIL import Image
 
 import tensorflow as tf
 
@@ -13,20 +14,28 @@ import tensorflow as tf
 
 # returns image of shape [224, 224, 3]
 # [height, width, depth]
-def load_image(path):
+def load_image(path, target_size=(224, 224)):
     # load image
-    img = skimage.io.imread(r'.\tensorflow_vgg\test_data\tiger.jpeg')
-    img = img / 255.0
-    assert (0 <= img).all() and (img <= 1.0).all()
+    #img = skimage.io.imread(r'.\tensorflow_vgg\test_data\66090.jpg')
+    #img = img / 255.0
+    #assert (0 <= img).all() and (img <= 1.0).all()
     # print "Original Image Shape: ", img.shape
     # we crop image from center
-    short_edge = min(img.shape[:2])
-    yy = int((img.shape[0] - short_edge) / 2)
-    xx = int((img.shape[1] - short_edge) / 2)
-    crop_img = img[yy: yy + short_edge, xx: xx + short_edge]
+    #short_edge = min(img.shape[:2])
+    #yy = int((img.shape[0] - short_edge) / 2)
+    #xx = int((img.shape[1] - short_edge) / 2)
+    #crop_img = img[yy: yy + short_edge, xx: xx + short_edge]
     # resize to 224, 224
-    resized_img = skimage.transform.resize(crop_img, (224, 224))
-    return resized_img
+    #resized_img = skimage.transform.resize(crop_img, (224, 224))
+    #return resized_img
+    try:
+        img = Image.open(path).convert('RGB')  # Ensure 3 channels
+        img = img.resize(target_size, Image.BILINEAR)
+        img_array = np.asarray(img, dtype=np.float32) / 255.0  # scale to [0,1]
+        return img_array
+    except Exception as e:
+        print(f"Error loading image {path}: {e}")
+        return None
 
 
 # returns the top1 string
@@ -35,7 +44,7 @@ def print_prob(prob, file_path):
     #script_dir = os.path.dirname(os.path.abspath(__file__))
     #full_path = os.path.join(script_dir, file_path)
 
-    synset = [l.strip() for l in open(r'.\tensorflow_vgg\synset.txt').readlines()]
+    synset = [l.strip() for l in open(r'.\tensorflow_vgg\plant_labels.txt').readlines()]
 
     # print prob
     pred = np.argsort(prob)[::-1]

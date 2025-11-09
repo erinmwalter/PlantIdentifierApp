@@ -8,19 +8,21 @@ from tensorflow.keras.layers import Dense
 import time
 
 VGG_MEAN = [103.939, 116.779, 123.68]
-
+#print("Current working dict:", os.getcwd())
 
 class Vgg16:
-    def __init__(self, vgg16_npy_path=None):
-        if vgg16_npy_path is None:
+    def __init__(self, fc_npy_path = None):
+        
+        if fc_npy_path is None:
             path = inspect.getfile(Vgg16)
             path = os.path.abspath(os.path.join(path, os.pardir))
-            path = os.path.join(path, "vgg16.npy")
-            vgg16_npy_path = path
+            path = os.path.join(path, "vgg16_plant_classifier.npy")
+            fc_npy_path = path
             print(path)
 
-        self.data_dict = np.load(vgg16_npy_path, encoding='latin1', allow_pickle=True).item()
-        print("npy file loaded")
+        #self.conv_dict = np.load(conv_npy_path, encoding='latin1', allow_pickle=True).item()
+        self.fc_dict = np.load(fc_npy_path, encoding='latin1', allow_pickle=True).item()
+        print("npy files loaded")
 
     def build(self, rgb):
         """
@@ -47,74 +49,75 @@ class Vgg16:
 
         self.conv1_1 = self.conv_layer(bgr, "conv1_1")
         self.conv1_2 = self.conv_layer(self.conv1_1, "conv1_2")
-        self.pool1 = self.max_pool(self.conv1_2, 'pool1')
+        self.pool1 = tf.nn.max_pool2d(self.conv1_2,ksize=2, strides=2, padding='SAME',name = 'pool1')
 
         self.conv2_1 = self.conv_layer(self.pool1, "conv2_1")
         self.conv2_2 = self.conv_layer(self.conv2_1, "conv2_2")
-        self.pool2 = self.max_pool(self.conv2_2, 'pool2')
+        self.pool2 = tf.nn.max_pool2d(self.conv2_2, ksize=2, strides=2, padding='SAME',name ='pool2')
 
         self.conv3_1 = self.conv_layer(self.pool2, "conv3_1")
         self.conv3_2 = self.conv_layer(self.conv3_1, "conv3_2")
         self.conv3_3 = self.conv_layer(self.conv3_2, "conv3_3")
-        self.pool3 = self.max_pool(self.conv3_3, 'pool3')
+        self.pool3 = tf.nn.max_pool2d(self.conv3_3, ksize=2, strides=2, padding='SAME',name ='pool3')
 
         self.conv4_1 = self.conv_layer(self.pool3, "conv4_1")
         self.conv4_2 = self.conv_layer(self.conv4_1, "conv4_2")
         self.conv4_3 = self.conv_layer(self.conv4_2, "conv4_3")
-        self.pool4 = self.max_pool(self.conv4_3, 'pool4')
+        self.pool4 = tf.nn.max_pool2d(self.conv4_3,ksize=2, strides=2, padding='SAME',name = 'pool4')
 
         self.conv5_1 = self.conv_layer(self.pool4, "conv5_1")
         self.conv5_2 = self.conv_layer(self.conv5_1, "conv5_2")
         self.conv5_3 = self.conv_layer(self.conv5_2, "conv5_3")
-        self.pool5 = self.max_pool(self.conv5_3, 'pool5')
+        self.pool5 = tf.nn.max_pool2d(self.conv5_3,ksize=2, strides=2, padding='SAME',name = 'pool5')
         #change below here
-        self.fc6 = self.fc_layer(self.pool5, "fc6")
-        assert self.fc6.get_shape().as_list()[1:] == [4096]
-        self.relu6 = tf.nn.relu(self.fc6)
+        #self.fc6 = self.fc_layer(self.pool5, "fc6")
+        #assert self.fc6.get_shape().as_list()[1:] == [4096]
+        #self.relu6 = tf.nn.relu(self.fc6)
 
-        self.fc7 = self.fc_layer(self.relu6, "fc7")
-        self.relu7 = tf.nn.relu(self.fc7)
+        #self.fc7 = self.fc_layer(self.relu6, "fc7")
+        #self.relu7 = tf.nn.relu(self.fc7)
 
-        self.fc8 = self.fc_layer(self.relu7, "fc8")
+        #self.fc8 = self.fc_layer(self.relu7, "fc8")
 
-        self.prob = tf.nn.softmax(self.fc8, name="prob")
+        #self.prob = tf.nn.softmax(self.fc8, name="prob")
         #what do I change? It is leaves with spots right 
-        self.data_dict = None
-        print(("build model finished: %ds" % (time.time() - start_time)))
+        #self.data_dict = None
+        #print(("build model finished: %ds" % (time.time() - start_time)))
 
 
         # Global Average Pooling instead of fc6
-        #self.gap = tf.reduce_mean(self.pool5, axis=[1, 2], name='global_avg_pool')
+        self.gap = tf.reduce_mean(self.pool5, axis=[1, 2], name='global_avg_pool')
     
         # Optional: smaller FC layer for dimensionality reduction
-        #self.fc7 = self.fc_layer(self.gap, name='fc7')
-        #adapter = Dense(4096, activation='relu')(self.fc7)
+        self.fc6 = self.fc_layer(self.gap, name='fc6')
+        self.relu6 = tf.nn.relu(self.fc6)
+        #assert self.fc6.get_shape().as_list()[1:] == [512]
         #self.fc7_output = fc7_layer(adapter)
-        #self.dropout = tf.nn.dropout(self.fc7_output, rate=0.5)
-    
+        
         # Final classification layer
-        #self.fc_disease = self.fc_layer(self.dropout, 71, name='fc_disease')
-        #self.prob = tf.nn.softmax(self.fc_disease, name="prob")
-
-        #self.data_dict = None
-        #print(("build model finished: %ds" % (time.time() - start_time)))
+        self.fc7 = self.fc_layer(self.relu6, name='fc7')
+        self.prob = tf.nn.softmax(self.fc7, name="prob")
+        # Final classification layer
+        
+        self.data_dict = None
+        print(("build model finished: %ds" % (time.time() - start_time)))
 
 
     #def avg_pool(self, bottom, name):
     #    return tf.nn.avg_pool(bottom, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME', name=name)
 
-    def max_pool(self, bottom, name):
-        return tf.nn.max_pool(bottom, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME', name=name)
+    #def max_pool(self, bottom, name):
+        #return tf.nn.max_pool(bottom, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME', name=name)
 
     def conv_layer(self, bottom, name):
         with tf.variable_scope(name):
             filt = self.get_conv_filter(name)
-
+            print(f"{name}_conv_weighs")
             conv = tf.nn.conv2d(bottom, filt, [1, 1, 1, 1], padding='SAME')
 
             conv_biases = self.get_bias(name)
             bias = tf.nn.bias_add(conv, conv_biases)
-
+            print()
             relu = tf.nn.relu(bias)
             return relu
 
@@ -132,14 +135,22 @@ class Vgg16:
             # Fully connected layer. Note that the '+' operation automatically
             # broadcasts the biases.
             fc = tf.nn.bias_add(tf.matmul(x, weights), biases)
-
+            print(f"{name}_fc_weighs")
             return fc
 
     def get_conv_filter(self, name):
-        return tf.constant(self.data_dict[name][0], name="filter")
+        return tf.constant(self.fc_dict[name][0], name="filter")
 
     def get_bias(self, name):
-        return tf.constant(self.data_dict[name][1], name="biases")
+        # Determine which dictionary to use (conv or fc)
+        if name in self.fc_dict:
+            print(f"{name}_biases")
+            return tf.constant(self.fc_dict[name][1], name=f"{name}_biases")
+            
+        #elif name in self.conv_dict:
+            #return tf.constant(self.conv_dict[name][1], name=f"{name}_biases")
+        else:
+            raise ValueError(f"No biases found for layer: {name}")
 
     def get_fc_weight(self, name):
-        return tf.constant(self.data_dict[name][0], name="weights")
+        return tf.constant(self.fc_dict[name][0], name="weights")

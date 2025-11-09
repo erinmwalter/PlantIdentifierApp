@@ -26,9 +26,9 @@ if gpus:
 with tf.device('/CPU:0'):
     vgg = vgg16_tf2.Vgg16()
     # Forward pass
-    vgg(batch1)  # runs the model eagerly
+    #vgg(batch1)  # runs the model eagerly
     prob = vgg(batch1).numpy()
 
 # Print probabilities
-print(prob)
+#print(prob)
 utils.print_prob(prob[0], './synset.txt')
