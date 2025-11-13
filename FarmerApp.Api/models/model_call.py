@@ -9,8 +9,8 @@ parent_dir = Path(__file__).resolve().parent.parent.parent
 sys.path.append(str(parent_dir))
 from tensorflow_vgg import vgg16, utils
 
-
-img1 = utils.load_image(r"C:\Users\abiga\Cro Disease ID\PlantIdentifierApp\tensorflow_vgg\test_data\66090.jpg") #this is where we need to connect the image from website to
+#Sugarcane_red_rot = 106661
+img1 = utils.load_image(r"C:\Users\abiga\Cro Disease ID\PlantIdentifierApp\tensorflow_vgg\test_data\106661.jpeg") #this is where we need to connect the image from website to
 
 batch1 = img1.reshape((1, 224, 224, 3))
 

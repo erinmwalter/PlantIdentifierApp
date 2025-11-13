@@ -11,8 +11,15 @@ VGG_MEAN = [103.939, 116.779, 123.68]
 #print("Current working dict:", os.getcwd())
 
 class Vgg16:
-    def __init__(self, fc_npy_path = None):
+    def __init__(self, fc_npy_path = None, conv_npy_path = None):
         
+        if conv_npy_path is None:
+            path = inspect.getfile(Vgg16)
+            path = os.path.abspath(os.path.join(path, os.pardir))
+            path = os.path.join(path, "vgg16.npy")
+            conv_npy_path = path
+            print(path)
+
         if fc_npy_path is None:
             path = inspect.getfile(Vgg16)
             path = os.path.abspath(os.path.join(path, os.pardir))
@@ -20,7 +27,7 @@ class Vgg16:
             fc_npy_path = path
             print(path)
 
-        #self.conv_dict = np.load(conv_npy_path, encoding='latin1', allow_pickle=True).item()
+        self.conv_dict = np.load(conv_npy_path, encoding='latin1', allow_pickle=True).item()
         self.fc_dict = np.load(fc_npy_path, encoding='latin1', allow_pickle=True).item()
         print("npy files loaded")
 
@@ -147,8 +154,8 @@ class Vgg16:
             print(f"{name}_biases")
             return tf.constant(self.fc_dict[name][1], name=f"{name}_biases")
             
-        #elif name in self.conv_dict:
-            #return tf.constant(self.conv_dict[name][1], name=f"{name}_biases")
+        elif name in self.conv_dict:
+            return tf.constant(self.conv_dict[name][1], name=f"{name}_biases")
         else:
             raise ValueError(f"No biases found for layer: {name}")
 
