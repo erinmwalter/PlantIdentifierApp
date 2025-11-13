@@ -1,6 +1,7 @@
 import Header from './components/Header';
 import ImageUpload from './components/ImageUpload';
 import PlantInfo from './components/PlantInfo';
+import SupportedPlants from './components/SupportedPlants';
 import './App.css';
 import { useState } from 'react';
 
