@@ -14,3 +14,11 @@
     font-size: 1.125rem;
     line-height: calc(1.75/1.125);
 }
+
+.supported-plants-btn {
+    background-color: #d1d5db;
+    color: #166534;
+    border-radius: 0.375rem;
+    height: 2rem;
+    width: 10rem;
+}
