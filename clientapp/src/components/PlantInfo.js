@@ -3,7 +3,6 @@
     component for displaying plant info onto page
 */
 
-import { useState, useEffect } from "react";
 import './PlantInfo.css'
 
 function PlantInfo({ predictionData }) {
