@@ -3,8 +3,7 @@ from flask_cors import CORS
 import os
 from routes.prediction_routes import prediction_bp
 
-# Initialize Flask app
-app = Flask(__name__, static_folder='./clientapp/build')
+app = Flask(__name__, static_folder='.', static_url_path='')
 CORS(app)
 
 # Register the prediction blueprint

@@ -1,0 +1,156 @@
+CLASSIFICATION REPORT
+============================================================
+
+                                precision    recall  f1-score   support
+
+  Apple___alternaria_leaf_spot      0.906     0.906     0.906        53
+             Apple___black_rot      0.925     0.980     0.951        50
+            Apple___brown_spot      1.000     1.000     1.000        31
+             Apple___gray_spot      0.870     0.887     0.879        53
+               Apple___healthy      0.838     0.954     0.892        65
+                  Apple___rust      0.864     0.836     0.850        61
+                  Apple___scab      0.869     0.883     0.876        60
+  Bell_pepper___bacterial_spot      0.868     0.983     0.922        60
+         Bell_pepper___healthy      0.962     0.980     0.971        51
+           Blueberry___healthy      0.984     0.938     0.961        65
+    Cassava___bacterial_blight      0.551     0.790     0.649        62
+Cassava___brown_streak_disease      0.548     0.309     0.395        55
+        Cassava___green_mottle      0.588     0.712     0.644        66
+             Cassava___healthy      0.729     0.544     0.623        79
+      Cassava___mosaic_disease      0.826     0.551     0.661        69
+              Cherry___healthy      0.972     0.972     0.972        71
+       Cherry___powdery_mildew      1.000     0.967     0.983        60
+              Coffee___healthy      0.750     0.750     0.750        60
+      Coffee___red_spider_mite      0.600     0.562     0.581        32
+                 Coffee___rust      0.581     0.761     0.659        71
+            Corn___common_rust      0.982     1.000     0.991        56
+         Corn___gray_leaf_spot      0.750     0.923     0.828        52
+                Corn___healthy      0.982     0.949     0.966        59
+   Corn___northern_leaf_blight      0.917     0.721     0.807        61
+           Grape___Leaf_blight      0.982     1.000     0.991        56
+         Grape___black_measles      0.952     0.894     0.922        66
+             Grape___black_rot      0.985     0.970     0.977        66
+               Grape___healthy      0.934     0.986     0.959        72
+      Orange___citrus_greening      0.984     1.000     0.992        61
+        Peach___bacterial_spot      0.959     0.959     0.959        73
+               Peach___healthy      0.962     0.980     0.971        51
+       Potato___bacterial_wilt      0.975     0.696     0.812        56
+         Potato___early_blight      0.946     0.914     0.930        58
+              Potato___healthy      0.906     0.460     0.611        63
+          Potato___late_blight      0.788     0.881     0.832        59
+       Potato___leafroll_virus      1.000     0.900     0.947        60
+         Potato___mosaic_virus      0.730     0.958     0.829        48
+             Potato___nematode      0.900     0.600     0.720        15
+                Potato___pests      0.704     0.781     0.741        64
+         Potato___phytophthora      0.828     0.774     0.800        62
+           Raspberry___healthy      0.981     1.000     0.991        53
+       Rice___bacterial_blight      0.795     0.983     0.879        59
+                  Rice___blast      0.980     0.781     0.870        64
+             Rice___brown_spot      0.981     0.946     0.964        56
+                 Rice___tungro      1.000     1.000     1.000        49
+                Rose___healthy      1.000     1.000     1.000        61
+                   Rose___rust      1.000     0.982     0.991        55
+            Rose___slug_sawfly      1.000     1.000     1.000        57
+             Soybean___healthy      0.871     0.982     0.923        55
+       Squash___powdery_mildew      1.000     1.000     1.000        49
+          Strawberry___healthy      1.000     1.000     1.000        64
+      Strawberry___leaf_scorch      0.967     0.983     0.975        60
+           Sugercane___healthy      0.754     0.925     0.831        53
+            Sugercane___mosaic      0.857     0.894     0.875        47
+           Sugercane___red_rot      0.774     0.872     0.820        47
+              Sugercane___rust      0.792     0.826     0.809        69
+       Sugercane___yellow_leaf      0.957     0.738     0.833        61
+       Tomato___bacterial_spot      0.726     0.897     0.803        68
+         Tomato___early_blight      0.816     0.597     0.690        67
+              Tomato___healthy      0.671     0.981     0.797        54
+          Tomato___late_blight      0.897     0.825     0.860        63
+            Tomato___leaf_curl      0.972     0.932     0.952        74
+            Tomato___leaf_mold      0.746     0.964     0.841        55
+         Tomato___mosaic_virus      0.982     0.933     0.957        60
+   Tomato___septoria_leaf_spot      0.793     0.719     0.754        64
+         Tomato___spider_mites      0.841     0.638     0.725        58
+          Tomato___target_spot      0.702     0.727     0.714        55
+      Watermelon___anthracnose      1.000     1.000     1.000        29
+     Watermelon___downy_mildew      0.986     1.000     0.993        68
+          Watermelon___healthy      1.000     0.979     0.989        48
+     Watermelon___mosaic_virus      0.984     0.969     0.976        64
+
+                      accuracy                          0.867      4118
+                     macro avg      0.876     0.869     0.866      4118
+                  weighted avg      0.875     0.867     0.865      4118
+
+
+PER-CLASS ACCURACY
+============================================================
+
+Cassava___brown_streak_disease: 30.9% (55 samples)
+Potato___healthy: 46.0% (63 samples)
+Cassava___healthy: 54.4% (79 samples)
+Cassava___mosaic_disease: 55.1% (69 samples)
+Coffee___red_spider_mite: 56.2% (32 samples)
+Tomato___early_blight: 59.7% (67 samples)
+Potato___nematode: 60.0% (15 samples)
+Tomato___spider_mites: 63.8% (58 samples)
+Potato___bacterial_wilt: 69.6% (56 samples)
+Cassava___green_mottle: 71.2% (66 samples)
+Tomato___septoria_leaf_spot: 71.9% (64 samples)
+Corn___northern_leaf_blight: 72.1% (61 samples)
+Tomato___target_spot: 72.7% (55 samples)
+Sugercane___yellow_leaf: 73.8% (61 samples)
+Coffee___healthy: 75.0% (60 samples)
+Coffee___rust: 76.1% (71 samples)
+Potato___phytophthora: 77.4% (62 samples)
+Potato___pests: 78.1% (64 samples)
+Rice___blast: 78.1% (64 samples)
+Cassava___bacterial_blight: 79.0% (62 samples)
+Tomato___late_blight: 82.5% (63 samples)
+Sugercane___rust: 82.6% (69 samples)
+Apple___rust: 83.6% (61 samples)
+Sugercane___red_rot: 87.2% (47 samples)
+Potato___late_blight: 88.1% (59 samples)
+Apple___scab: 88.3% (60 samples)
+Apple___gray_spot: 88.7% (53 samples)
+Sugercane___mosaic: 89.4% (47 samples)
+Grape___black_measles: 89.4% (66 samples)
+Tomato___bacterial_spot: 89.7% (68 samples)
+Potato___leafroll_virus: 90.0% (60 samples)
+Apple___alternaria_leaf_spot: 90.6% (53 samples)
+Potato___early_blight: 91.4% (58 samples)
+Corn___gray_leaf_spot: 92.3% (52 samples)
+Sugercane___healthy: 92.5% (53 samples)
+Tomato___leaf_curl: 93.2% (74 samples)
+Tomato___mosaic_virus: 93.3% (60 samples)
+Blueberry___healthy: 93.8% (65 samples)
+Rice___brown_spot: 94.6% (56 samples)
+Corn___healthy: 94.9% (59 samples)
+Apple___healthy: 95.4% (65 samples)
+Potato___mosaic_virus: 95.8% (48 samples)
+Peach___bacterial_spot: 95.9% (73 samples)
+Tomato___leaf_mold: 96.4% (55 samples)
+Cherry___powdery_mildew: 96.7% (60 samples)
+Watermelon___mosaic_virus: 96.9% (64 samples)
+Grape___black_rot: 97.0% (66 samples)
+Cherry___healthy: 97.2% (71 samples)
+Watermelon___healthy: 97.9% (48 samples)
+Apple___black_rot: 98.0% (50 samples)
+Bell_pepper___healthy: 98.0% (51 samples)
+Peach___healthy: 98.0% (51 samples)
+Tomato___healthy: 98.1% (54 samples)
+Rose___rust: 98.2% (55 samples)
+Soybean___healthy: 98.2% (55 samples)
+Rice___bacterial_blight: 98.3% (59 samples)
+Bell_pepper___bacterial_spot: 98.3% (60 samples)
+Strawberry___leaf_scorch: 98.3% (60 samples)
+Grape___healthy: 98.6% (72 samples)
+Apple___brown_spot: 100.0% (31 samples)
+Corn___common_rust: 100.0% (56 samples)
+Grape___Leaf_blight: 100.0% (56 samples)
+Orange___citrus_greening: 100.0% (61 samples)
+Raspberry___healthy: 100.0% (53 samples)
+Rice___tungro: 100.0% (49 samples)
+Rose___healthy: 100.0% (61 samples)
+Rose___slug_sawfly: 100.0% (57 samples)
+Squash___powdery_mildew: 100.0% (49 samples)
+Strawberry___healthy: 100.0% (64 samples)
+Watermelon___anthracnose: 100.0% (29 samples)
+Watermelon___downy_mildew: 100.0% (68 samples)

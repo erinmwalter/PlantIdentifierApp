@@ -21,7 +21,12 @@ class ModelLoader:
     
         try:
             print(f"Loading model from {model_path}...")
-            self._model = tf.keras.models.load_model(model_path)
+            self._model = tf.keras.models.load_model(model_path, compile=False)
+            self._model.compile(
+                optimizer='adam',
+                loss='categorical_crossentropy',
+                metrics=['accuracy']
+            )
             print("Model loaded successfully!")
             return self._model
         except Exception as e:

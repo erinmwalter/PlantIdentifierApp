@@ -1,0 +1,25 @@
+graph TB
+    subgraph "Docker Container"
+        PORT[":8080"]
+        
+        subgraph "Flask Backend"
+            API[API Routes<br/>/api/predict<br/>/api/supported-crops]
+            SERVICES[Services<br/>Image preprocessing<br/>Predictions]
+            MODELS[Models<br/>TensorFlow model<br/>Class labels]
+        end
+        
+        STATIC[Static Files<br/>React Frontend]
+        
+        LIBS[Python Libraries<br/>TensorFlow, Pillow, NumPy]
+    end
+    
+    PORT --> API
+    PORT --> STATIC
+    API --> SERVICES
+    SERVICES --> MODELS
+    SERVICES --> LIBS
+    
+    style PORT fill:#000000,stroke:#0288d1,stroke-width:3px
+    style API fill:#000000,stroke:#f57c00,stroke-width:2px
+    style MODELS fill:#000000,stroke:#8e24aa,stroke-width:2px
+    style SERVICES fill:#000000,stroke:#8e24aa,stroke-width:2px
