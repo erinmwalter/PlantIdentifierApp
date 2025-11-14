@@ -1,6 +1,8 @@
 import numpy as np
 from PIL import Image
 import io
+import json
+import os
 from models.model_loader import ModelLoader
 from typing import Dict, Any
 
@@ -11,47 +13,55 @@ class PredictionService:
         self.model_loader = ModelLoader()
         self.model = self.model_loader.get_model()
         
-        # Image input size TODO: Fix this based on how model is trained?
         self.img_height = 224 
         self.img_width = 224
         
-        # TODO: Update this list with the actual crops from training
-        # I put some placeholder crops here just for the sake of getting code flow
-        # written but this can be changed as needed.
-        self.crop_labels = [
-            'Rice', 
-            'Wheat', 
-            'Maize',
-            'Cotton',
-            'Tomato',
-            'Potato',
-            'Sugarcane',
-            'Soybean'
-            # Add more crops as needed
-        ]
+        # Load class labels from JSON file
+        self.crop_labels = self._load_class_labels()
     
+    def _load_class_labels(self):
+        labels_path = "models/class_labels.json"
+        
+        try:
+            if not os.path.exists(labels_path):
+                print(f"Warning: {labels_path} not found, using default labels")
+                return [
+                    'Rice', 'Wheat', 'Maize', 'Cotton',
+                    'Tomato', 'Potato', 'Sugarcane', 'Soybean'
+                ]
+            
+            with open(labels_path, 'r') as f:
+                labels_dict = json.load(f)
+            
+            num_classes = len(labels_dict)
+            labels_list = [None] * num_classes
+            
+            for idx_str, label_name in labels_dict.items():
+                idx = int(idx_str)
+                labels_list[idx] = label_name
+            
+            print(f"Loaded {len(labels_list)} class labels from {labels_path}")
+            return labels_list
+            
+        except Exception as e:
+            print(f"Error loading class labels: {str(e)}")
+            print("Using default labels as fallback")
+            return [
+                'Rice', 'Wheat', 'Maize', 'Cotton',
+                'Tomato', 'Potato', 'Sugarcane', 'Soybean'
+            ]
+
     def preprocess_image(self, image_file) -> np.ndarray:
         try:
-            # Read the image file
             image = Image.open(io.BytesIO(image_file.read()))
-            
-            # Convert to RGB (handles RGBA, grayscale, etc.)
             image = image.convert('RGB')
-            
-            # Resize to model's expected input size
             image = image.resize((self.img_width, self.img_height))
-            
-            # Convert to numpy array
+        
             img_array = np.array(image)
-            
-            # Normalize pixel values to [0, 1] range
-            img_array = img_array / 255.0
-            
-            # Add batch dimension: (height, width, channels) -> (1, height, width, channels)
+        
             img_array = np.expand_dims(img_array, axis=0)
-            
             return img_array
-            
+        
         except Exception as e:
             raise ValueError(f"Failed to preprocess image: {str(e)}")
     

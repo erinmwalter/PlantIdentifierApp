@@ -1,0 +1,27 @@
+graph LR
+    subgraph "Local Development"
+        CODE[Source Code<br/>Flask + React<br/>Dockerfile]
+    end
+    
+    subgraph "Docker Build Process"
+        BUILD[docker compose build<br/>Creates image]
+        IMAGE[Docker Image<br/>plantidentifierapp:latest]
+    end
+    
+    subgraph "Google Cloud Platform"
+        REGISTRY[Artifact Registry<br/>Stores Docker images]
+        CLOUDRUN[Cloud Run<br/>Runs container<br/>Auto-scales]
+        URL[Public URL<br/>https://your-app.run.app]
+    end
+    
+    CODE --> BUILD
+    BUILD --> IMAGE
+    IMAGE -->|Push| REGISTRY
+    REGISTRY -->|Deploy| CLOUDRUN
+    CLOUDRUN --> URL
+    
+    style CODE fill:#e8f5e9,stroke:#43a047,stroke-width:2px
+    style IMAGE fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style REGISTRY fill:#e1f5ff,stroke:#0288d1,stroke-width:2px
+    style CLOUDRUN fill:#f3e5f5,stroke:#8e24aa,stroke-width:2px
+    style URL fill:#ffebee,stroke:#e53935,stroke-width:2px

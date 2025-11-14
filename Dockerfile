@@ -1,5 +1,4 @@
-# Stage 1: Build React
-FROM node:18-alpine AS frontend-build
+FROM node:20-alpine AS frontend-build
 WORKDIR /app
 COPY clientapp/package*.json ./
 RUN npm install
@@ -14,9 +13,7 @@ COPY FarmerApp.Api/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY FarmerApp.Api/ ./
-COPY --from=frontend-build /app/build ./clientapp/build
+COPY --from=frontend-build /app/build ./
 
 EXPOSE 8080
-ENV PORT=8080
-
 CMD ["python", "app.py"]
