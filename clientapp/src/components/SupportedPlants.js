@@ -10,7 +10,7 @@ function SupportedPlants({ isOpen, onClose }) {
         if (isOpen) {
             fetchSupportedCrops();
         }
-    }, { isOpen });
+    }, [ isOpen ]);
 
     const fetchSupportedCrops = async () => {
         setLoading(true);
@@ -37,7 +37,7 @@ function SupportedPlants({ isOpen, onClose }) {
 
     return (
         <div className='modal-overlay' onClick={onClose}>
-            <div className='modal-content' onClick={(e).stopPropagation()}>
+            <div className='modal-content' onClick={(e) => e.stopPropagation()}>
                 <div className='modal-header'>
                     <h2>Supported Plants</h2>
                     <button className='close-btn' onClick={onClose}>X</button>
